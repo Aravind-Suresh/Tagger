@@ -55,7 +55,7 @@ app.controller('myCtrl', function($scope, $http, Upload){
 
 			var req = {
 				method : 'POST',
-				url : '/',
+				url : '/tag',
 				data : {
 					"data": data
 				},

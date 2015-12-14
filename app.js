@@ -27,9 +27,39 @@ app.use(express.static(path.join(__dirname, 'public')));
 	}
 }));
 */
-app.post('/', function (req, res) {
+
+var mongoose = require("mongoose");
+var db = mongoose.connection;
+
+var settings = require("./settings");
+db.open('mongodb://'+settings.db.mongo.username+":"+settings.db.mongo.password+"@"+settings.db.mongo.host+'/'+settings.db.mongo.name);
+
+var Models = require("./models");
+var _ = require("underscore");
+var Q = require("q");
+
+app.post('/tag', function (req, res) {
 	debugger;
-	res.end(JSON.stringify({ result : true }));
+	var Thing = Models.Thing;
+	var params = req.body;
+	var keys = _.pluck(params.data, "filename");
+
+	debugger;
+
+	Thing.remove({ key : {
+		$in : keys
+	}}).exec().then(function(result) {
+		debugger;
+		for(var i=0; i<params.data.length; ++i) {
+			var ele = params.data[i];
+			debugger;
+			var thing = new Thing({ key : ele.filename, tags : ele.tags });
+			thing.save();
+		}
+
+		debugger;
+		res.end(JSON.stringify({ result : true }));
+	});
 });
 
 // catch 404 and forward to error handler
